@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Card, CardContent, MenuItem, Select } from '@mui/material';
+import Server from "../constants/server";
+import axios from 'axios';
 
+const API_URL = Server.API_URL;
 const Withdraw = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const rows = [
@@ -9,7 +12,20 @@ const Withdraw = () => {
     { id: '123', userId: '049858', email: 'email@emails.com', address: '2345678987654334yhgfsrer5678722', dnt: '2334/44/44:23:44', status: 'Completed' },
     { id: '123', userId: '049858', email: 'email@emails.com', address: '2345678987654334yhgfsrer5678722', dnt: '2334/44/44:23:44', status: 'Processing' },
   ];
+  useEffect(() => {
+    fetchData();
+  }, []);
 
+  const fetchData = async () => {
+    const allWithdrawRes = await axios.get(`${API_URL}/get_all_withdrawals`);
+
+    const data = [];
+    for (let index = 0; index < allPackagesRes.data.length; index++) {
+      const rowData= createData(allPackagesRes.data[index].packageID, allPackagesRes.data[index].packageName, allPackagesRes.data[index].personalMinFund, allPackagesRes.data[index].personalMaxFund, allPackagesRes.data[index].rebateFee,  'Active')
+      data.push(rowData);
+    }
+    setRows(data);
+  }
   const filteredRows = statusFilter === 'All' ? rows : rows.filter(row => row.status === statusFilter);
 
   return (

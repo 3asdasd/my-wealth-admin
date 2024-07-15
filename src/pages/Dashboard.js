@@ -1,16 +1,39 @@
-import React from 'react';
+import React, { useEffect ,useState} from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Typography, Card, CardContent, Grid, Paper } from '@mui/material';
+import axios from 'axios';
+
+import Server from "../constants/server";
 
 const Dashboard = () => {
-  const data = [
-    { title: 'Funding Bal.', value: '12345678', subtitle: 'Total balance - $10000.00' },
-    { title: 'Spot Bal.', value: '12345678', subtitle: 'Total balance - $10000.00' },
-    { title: 'Pending req.', value: '200', subtitle: 'Total withdraws - $10000.00' },
-    { title: 'Completed req.', value: '34678', subtitle: 'Total Users - 10000' },
-    { title: 'Active Users', value: '200', subtitle: 'Total Users - 10000' },
-    { title: 'Inactive Users', value: '34678', subtitle: 'Total Trades count - 10000' },
-  ];
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const API_URL = Server.API_URL;
+    const allFunding = await axios.get(`${API_URL}/all_funding_balance`);
+    const allSpot = await axios.get(`${API_URL}/users_spot_balance`);
+    const allTotal = await axios.get(`${API_URL}/users_total_balance`);
+    const rtFunding = await axios.get(`${API_URL}/rt_funding_balance`);
+    const rtSpot = await axios.get(`${API_URL}/rt_users_spot_balance`);
+    const rtTotal = await axios.get(`${API_URL}/all_rt_users_balance`);
+    const allUsers = await axios.get(`${API_URL}/get_all_users`);
+
+    console.log(allFunding.data["Total Funding Balance"], allSpot.data["total_spot_balance"], allTotal.data["total_balance"], rtFunding.data["Total_RT_Funding_Balance"], rtSpot.data["total_spot_balance"], rtTotal.data["total_balance"]);
+    console.log(allUsers.data.users.length)
+    const resdata = [
+      { title: 'Funding Bal.', value: allFunding.data["Total Funding Balance"], subtitle: 'Total balance - $'+allTotal.data["total_balance"] },
+      { title: 'Spot Bal.', value: allSpot.data["total_spot_balance"], subtitle: 'Total balance - $'+allTotal.data["total_balance"]},
+      { title: 'Pending req.', value: '200', subtitle: 'Total withdraws - $10000.00' },
+      { title: 'Completed req.', value: '34678', subtitle: 'Total Users - '+allUsers.data.users.length },
+      { title: 'Active Users', value: '200', subtitle: 'Total Users - '+allUsers.data.users.length },
+      { title: 'Inactive Users', value: '34678', subtitle: 'Total Trades count - 10000' },
+    ];
+    setData(resdata);
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>

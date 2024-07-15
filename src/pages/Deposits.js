@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem } from '@mui/material';
-
+import Server from "../constants/server";
+import axios from 'axios';
+const API_URL = Server.API_URL;
 const Deposits = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   
@@ -10,6 +12,22 @@ const Deposits = () => {
     { id: '124', userId: '049859', email: 'email2@emails.com', address: '2345678987654334yhgfsrer5678722', dnt: '2334/44/44:23:44', status: 'Completed' },
     { id: '125', userId: '049860', email: 'email3@emails.com', address: '2345678987654334yhgfsrer5678722', dnt: '2334/44/44:23:44', status: 'Processing' },
   ];
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    
+    const allPackagesRes = await axios.get(`${API_URL}/get_all_deposits`);
+console.log(allPackagesRes.data);
+    const data = [];
+    for (let index = 0; index < allPackagesRes.data.length; index++) {
+      const rowData= createData(allPackagesRes.data[index].packageID, allPackagesRes.data[index].packageName, allPackagesRes.data[index].personalMinFund, allPackagesRes.data[index].personalMaxFund, allPackagesRes.data[index].rebateFee,  'Active')
+      data.push(rowData);
+    }
+    setRows(data);
+  }
 
   const filteredRows = statusFilter === 'All' ? rows : rows.filter(row => row.status === statusFilter);
 

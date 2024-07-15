@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 
 const Register = () => {
-  const [username, setUsername] = useState('');
+  const [user_name, setuser_name] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,11 +20,12 @@ const Register = () => {
       setError('Passwords do not match');
       return;
     }
-    console.log(username, email, password);
+    console.log(user_name, email, password);
 
-    dispatch(register({ username, email, password }))
+    dispatch(register({ user_name, email, password }))
       .unwrap()
       .then(() => {
+        localStorage.setItem('registerEmail', email);
         navigate('/verify-otp');
       })
       .catch(() => {
@@ -39,11 +40,11 @@ const Register = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <TextField
-              label="Username"
+              label="user_name"
               variant="outlined"
               fullWidth
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={user_name}
+              onChange={(e) => setuser_name(e.target.value)}
             />
           </div>
           <div className="mb-4">

@@ -1,15 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
+import Server from "../constants/server";
+import axios from 'axios';
 import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem } from '@mui/material';
+import { RowingOutlined } from '@mui/icons-material';
 
 const Users = () => {
   const [statusFilter, setStatusFilter] = useState('All');
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const API_URL = Server.API_URL;
+    const allUsersRes = await axios.get(`${API_URL}/get_all_users`);
+
+    const data = [];
+    for (let index = 0; index < allUsersRes.data.users.length; index++) {
+      const user = allUsersRes.data.users[index];
+      const rowData = {
+        id: user.userID,
+        name: user.name,
+        email: user.email,
+        role: 'User',
+        status: 'Active'
+      };
+      data.push(rowData);
+    }
+    setRows(data);
+  }
   
-  const rows = [
-    { id: '001', name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', status: 'Active' },
-    { id: '002', name: 'Jane Smith', email: 'jane.smith@example.com', role: 'User', status: 'Inactive' },
-    { id: '003', name: 'Sam Johnson', email: 'sam.johnson@example.com', role: 'User', status: 'Pending' },
-  ];
+ 
 
   const filteredRows = statusFilter === 'All' ? rows : rows.filter(row => row.status === statusFilter);
 

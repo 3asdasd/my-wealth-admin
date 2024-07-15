@@ -10,10 +10,18 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login({ email, password }));
+    dispatch(login({ email, password }))
+      .unwrap()
+      .then(() => {
+        navigate('/dashboard');
+      })
+      .catch(() => {
+        setError('login failed');
+      });
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import Sidebar from '../components/Sidebar';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
@@ -18,6 +18,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import Server from "../constants/server";
+import axios from 'axios';
 
 const createData = (id, name, amount, rebate, dnt, status) => {
   return { id, name, amount, rebate, dnt, status };
@@ -27,7 +29,7 @@ const initialRows = [
   createData('1', 'Intro', '50', '8.0', '2334/44/44:23:44', 'Active'),
   createData('2', 'Level1', '199', '12.0', '2334/44/44:23:44', 'Inactive'),
 ];
-
+const API_URL = Server.API_URL;
 const Packages = () => {
   const [rows, setRows] = useState(initialRows);
   const [filter, setFilter] = useState('All');
@@ -35,12 +37,27 @@ const Packages = () => {
   const [newPackage, setNewPackage] = useState({
     id: '',
     name: '',
-    amount: '',
+    minFund:'',
+    maxFund:'',
     rebate: '',
-    dnt: '',
     status: 'Active',
   });
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    
+    const allPackagesRes = await axios.get(`${API_URL}/get_packages`);
+
+    const data = [];
+    for (let index = 0; index < allPackagesRes.data.length; index++) {
+      const rowData= createData(allPackagesRes.data[index].packageID, allPackagesRes.data[index].packageName, allPackagesRes.data[index].personalMinFund, allPackagesRes.data[index].personalMaxFund, allPackagesRes.data[index].rebateFee,  'Active')
+      data.push(rowData);
+    }
+    setRows(data);
+  }
   const handleStatusChange = (id, newStatus) => {
     setRows(rows.map(row => row.id === id ? { ...row, status: newStatus } : row));
   };
@@ -53,8 +70,19 @@ const Packages = () => {
     setOpen(false);
   };
 
-  const handleSave = () => {
-    setRows([...rows, { ...newPackage, id: rows.length + 1 }]);
+  const handleSave = async () => {
+    const formData = new FormData();
+    formData.append('packageName', newPackage.name);
+    formData.append('personalMinFund', newPackage.minFund);
+    formData.append('personalMaxFund', newPackage.maxFund);
+    formData.append('rebateFee', newPackage.rebate);
+    await axios.post(`${API_URL}/create_package`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    fetchData();
+    // setRows([...rows, { ...newPackage, id: rows.length + 1 }]);
     handleClose();
   };
 
@@ -76,9 +104,9 @@ const Packages = () => {
               <TableRow>
                 <TableCell>#ID</TableCell>
                 <TableCell>Package Name</TableCell>
-                <TableCell>Amount (base fee)</TableCell>
+                <TableCell>personalMinFund</TableCell>
+                <TableCell>personalMaxFund</TableCell>
                 <TableCell>Rebate Fee</TableCell>
-                <TableCell>DnT</TableCell>
                 <TableCell>Status</TableCell>
               </TableRow>
             </TableHead>
@@ -116,13 +144,21 @@ const Packages = () => {
               value={newPackage.name}
               onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
             />
-            <TextField
+             <TextField
               margin="dense"
-              label="Amount (base fee)"
+              label="Personal Min Fund"
               type="number"
               fullWidth
-              value={newPackage.amount}
-              onChange={(e) => setNewPackage({ ...newPackage, amount: e.target.value })}
+              value={newPackage.minFund}
+              onChange={(e) => setNewPackage({ ...newPackage, minFund: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Personal Max Fund"
+              type="number"
+              fullWidth
+              value={newPackage.maxFund}
+              onChange={(e) => setNewPackage({ ...newPackage, maxFund: e.target.value })}
             />
             <TextField
               margin="dense"

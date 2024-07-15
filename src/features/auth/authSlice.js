@@ -4,17 +4,17 @@ import axios from 'axios';
 const API_URL = 'http://5.189.141.126:5000';
 
 export const login = createAsyncThunk('auth/login', async (userData) => {
-  const response = await axios.post(`${API_URL}/login`, userData);
+  const response = await axios.post(`${API_URL}/admin_login`, userData);
   return response.data;
 });
 
 export const register = createAsyncThunk('/register', async (userData) => {
-  const response = await axios.post(`${API_URL}/Register`, userData);
+  const response = await axios.post(`${API_URL}/admin_register`, userData);
   return response.data;
 });
 
 export const verifyOTP = createAsyncThunk('auth/verifyOTP', async (otpData) => {
-  const response = await axios.post(`${API_URL}/verify-otp`, otpData);
+  const response = await axios.post(`${API_URL}/check_otp`, otpData);
   return response.data;
 });
 

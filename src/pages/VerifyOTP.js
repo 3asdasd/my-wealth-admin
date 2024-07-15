@@ -2,15 +2,26 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { verifyOTP } from '../features/auth/authSlice';
 import TextField from '@mui/material/TextField';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState('');
+  const email=localStorage.getItem('registerEmail');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(verifyOTP({ otp }));
+    dispatch(verifyOTP({ otp,email }))
+      .unwrap()
+      .then(() => {
+        navigate('/login');
+      })
+      .catch(() => {
+        setError('Registration failed');
+      });
   };
 
   return (
