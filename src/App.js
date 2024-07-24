@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import {Routes, Route, HashRouter} from "react-router-dom";
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyOTP from './pages/VerifyOTP';
@@ -12,9 +12,9 @@ import Users from './pages/Users';
 
 function App() {
   return (
-    <Router>
+    <HashRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -24,7 +24,7 @@ function App() {
         <Route path="/packages" element={<Packages />} />
         <Route path="/users" element={<Users />} />
       </Routes>
-    </Router>
+    </HashRouter>
   );
 }
 

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { register } from '../features/auth/authSlice';
 import { Link, useNavigate } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Server from "../constants/server";
+import axios from 'axios';
+
+const API_URL = Server.API_URL;
 
 const Register = () => {
   const [user_name, setuser_name] = useState('');
@@ -11,10 +13,9 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -22,15 +23,14 @@ const Register = () => {
     }
     console.log(user_name, email, password);
 
-    dispatch(register({ user_name, email, password }))
-      .unwrap()
-      .then(() => {
-        localStorage.setItem('registerEmail', email);
-        navigate('/verify-otp');
-      })
-      .catch(() => {
-        setError('Registration failed');
-      });
+    await axios.post(`${API_URL}/admin_register`, { user_name, email, password }) 
+    .then(() => {
+      localStorage.setItem('registerEmail', email);
+      navigate('/verify-otp');
+    })
+    .catch(() => {
+      setError('Registration failed');
+    });
   };
 
   return (
@@ -81,7 +81,7 @@ const Register = () => {
             Register
           </Button>
           <div className="mt-4 text-center">
-            <Link to="/login" className="text-blue-500 hover:underline">
+            <Link to="" className="text-blue-500 hover:underline">
               Already have an account? Login
             </Link>
           </div>

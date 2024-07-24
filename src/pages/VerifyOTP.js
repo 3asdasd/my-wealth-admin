@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { verifyOTP } from '../features/auth/authSlice';
 import TextField from '@mui/material/TextField';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
+import Server from "../constants/server";
+import axios from 'axios';
+
+const API_URL = Server.API_URL;
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState('');
   const email=localStorage.getItem('registerEmail');
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(verifyOTP({ otp,email }))
-      .unwrap()
-      .then(() => {
-        navigate('/login');
-      })
-      .catch(() => {
-        setError('Registration failed');
-      });
+    await axios.post(`${API_URL}/check_otp`, { otp,email })
+    .then(() => {
+      navigate('/');
+    })
+    .catch(() => {
+      setError('Registration failed');
+    });
   };
 
   return (

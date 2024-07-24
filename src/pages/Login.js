@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { login } from '../features/auth/authSlice';
 import { Link, useNavigate } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Server from "../constants/server";
+import axios from 'axios';
+
+const API_URL = Server.API_URL;
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(login({ email, password }))
-      .unwrap()
-      .then(() => {
-        navigate('/dashboard');
-      })
-      .catch(() => {
-        setError('login failed');
-      });
+    await axios.post(`${API_URL}/admin_login`, { email, password })
+    .then(() => {
+      navigate('/dashboard');
+    })
+    .catch(() => {
+      setError('login failed');
+    });
   };
 
   return (
