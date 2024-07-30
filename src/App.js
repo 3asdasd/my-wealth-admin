@@ -1,5 +1,5 @@
 import React from 'react';
-import {Routes, Route, HashRouter} from "react-router-dom";
+import { Routes, Route, HashRouter } from "react-router-dom";
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyOTP from './pages/VerifyOTP';
