@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
@@ -8,21 +8,20 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
 import Server from "../constants/server";
 import axios from 'axios';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
-const createData = (id, name, amount, rebate, dnt, status) => {
-  return { id, name, amount, rebate, dnt, status };
+const createData = (id, name, minFund, maxFund, rebate) => {
+  return { id, name, minFund, maxFund, rebate };
 };
 
 const initialRows = [
@@ -32,15 +31,23 @@ const initialRows = [
 const API_URL = Server.API_URL;
 const Packages = () => {
   const [rows, setRows] = useState(initialRows);
-  const [filter, setFilter] = useState('All');
+  const [deletePackageId, setDeletePackageId] = useState('');
   const [open, setOpen] = useState(false);
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [editAlertOpen, setEditAlertOpen] = useState(false);
   const [newPackage, setNewPackage] = useState({
     id: '',
     name: '',
-    minFund:'',
-    maxFund:'',
+    minFund: '',
+    maxFund: '',
     rebate: '',
-    status: 'Active',
+  });
+  const [editPackage, setEditPackage] = useState({
+    id: '',
+    name: '',
+    minFund: '',
+    maxFund: '',
+    rebate: '',
   });
 
   useEffect(() => {
@@ -48,19 +55,48 @@ const Packages = () => {
   }, []);
 
   const fetchData = async () => {
-    
+
     const allPackagesRes = await axios.get(`${API_URL}/get_packages`);
 
     const data = [];
     for (let index = 0; index < allPackagesRes.data.length; index++) {
-      const rowData= createData(allPackagesRes.data[index].packageID, allPackagesRes.data[index].packageName, allPackagesRes.data[index].personalMinFund, allPackagesRes.data[index].personalMaxFund, allPackagesRes.data[index].rebateFee,  'Active')
+      const rowData = createData(allPackagesRes.data[index].packageID, allPackagesRes.data[index].packageName, allPackagesRes.data[index].personalMinFund, allPackagesRes.data[index].personalMaxFund, allPackagesRes.data[index].rebateFee)
       data.push(rowData);
     }
     setRows(data);
   }
-  const handleStatusChange = (id, newStatus) => {
-    setRows(rows.map(row => row.id === id ? { ...row, status: newStatus } : row));
+
+
+  const handleDelete = async () => {
+    setDeleteAlertOpen(false);
+    try {
+      let id = deletePackageId;
+      if (!id) {
+        console.error("Package ID is undefined or null");
+        return;
+      }
+
+      console.log("Deleting package with ID:", id);
+
+      const deleteRes = await axios.delete(`${API_URL}/package_delete/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log("Package deleted successfully:", deleteRes.data);
+
+      if (deleteRes.status === 200) {
+        fetchData();
+      } else {
+        console.error("Deletion failed:", deleteRes.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred while deleting the package:", error.response ? error.response.data : error.message);
+    }
   };
+
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -68,6 +104,22 @@ const Packages = () => {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleDeleteAlertOpen = () => {
+    setDeleteAlertOpen(true);
+  };
+
+  const handleDeleteAlertClose = () => {
+    setDeleteAlertOpen(false);
+  };
+
+  const handleEditAlertOpen = () => {
+    setEditAlertOpen(true);
+  };
+
+  const handleEditAlertClose = () => {
+    setEditAlertOpen(false);
   };
 
   const handleSave = async () => {
@@ -82,11 +134,41 @@ const Packages = () => {
       },
     });
     fetchData();
+    setNewPackage({
+      id: '',
+      name: '',
+      minFund: '',
+      maxFund: '',
+      rebate: '',
+    });
     // setRows([...rows, { ...newPackage, id: rows.length + 1 }]);
     handleClose();
   };
 
-  const filteredRows = filter === 'All' ? rows : rows.filter(row => row.status === filter);
+  const handleEdit = async () => {
+    const formData = new FormData();
+    formData.append('packageID', editPackage.id);
+    formData.append('packageName', editPackage.name);
+    formData.append('personalMinFund', editPackage.minFund);
+    formData.append('personalMaxFund', editPackage.maxFund);
+    formData.append('rebateFee', editPackage.rebate);
+    await axios.put(`${API_URL}/update_package`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    fetchData();
+    setEditPackage({
+      id: '',
+      name: '',
+      minFund: '',
+      maxFund: '',
+      rebate: '',
+    });
+    handleEditAlertClose();
+  };
+
+
 
   return (
     <div className="flex">
@@ -107,25 +189,38 @@ const Packages = () => {
                 <TableCell>personalMinFund</TableCell>
                 <TableCell>personalMaxFund</TableCell>
                 <TableCell>Rebate Fee</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredRows.map((row) => (
+              {rows.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell>{row.id}</TableCell>
                   <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.amount}</TableCell>
+                  <TableCell>{row.minFund}</TableCell>
+                  <TableCell>{row.maxFund}</TableCell>
                   <TableCell>{row.rebate}</TableCell>
-                  <TableCell>{row.dnt}</TableCell>
                   <TableCell>
-                    <Select
-                      value={row.status}
-                      onChange={(e) => handleStatusChange(row.id, e.target.value)}
-                    >
-                      <MenuItem value="Active">Active</MenuItem>
-                      <MenuItem value="Inactive">Inactive</MenuItem>
-                    </Select>
+                    <IconButton aria-label="delete" color="error" onClick={() => {
+                      setDeletePackageId(row.id);
+                      handleDeleteAlertOpen();
+                    }}>
+                      <DeleteIcon />
+                    </IconButton>
+                    <IconButton aria-label="edit" onClick={() => {
+                      setEditPackage({
+                        id: row.id,
+                        name: row.name,
+                        minFund: row.minFund,
+                        maxFund: row.maxFund,
+                        rebate: row.rebate,
+                      })
+                      handleEditAlertOpen();
+                    }}>
+                      <EditIcon />
+                    </IconButton>
+
+
                   </TableCell>
                 </TableRow>
               ))}
@@ -144,7 +239,7 @@ const Packages = () => {
               value={newPackage.name}
               onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
             />
-             <TextField
+            <TextField
               margin="dense"
               label="Personal Min Fund"
               type="number"
@@ -168,20 +263,75 @@ const Packages = () => {
               value={newPackage.rebate}
               onChange={(e) => setNewPackage({ ...newPackage, rebate: e.target.value })}
             />
-            <Select
-              fullWidth
-              value={newPackage.status}
-              onChange={(e) => setNewPackage({ ...newPackage, status: e.target.value })}
-            >
-              <MenuItem value="Active">Active</MenuItem>
-              <MenuItem value="Inactive">Inactive</MenuItem>
-            </Select>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
               Cancel
             </Button>
             <Button onClick={handleSave} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog
+          open={deleteAlertOpen}
+          onClose={handleDeleteAlertClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Are You sure you want to delete this package?"}
+          </DialogTitle>
+
+          <DialogActions>
+            <Button onClick={handleDeleteAlertClose}>Cancel</Button>
+            <Button onClick={handleDelete} autoFocus>
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={editAlertOpen} onClose={handleEditAlertClose}>
+          <DialogTitle>Edit Package</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Package Name"
+              type="text"
+              fullWidth
+              value={editPackage.name}
+              onChange={(e) => setEditPackage({ ...editPackage, name: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Personal Min Fund"
+              type="number"
+              fullWidth
+              value={editPackage.minFund}
+              onChange={(e) => setEditPackage({ ...editPackage, minFund: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Personal Max Fund"
+              type="number"
+              fullWidth
+              value={editPackage.maxFund}
+              onChange={(e) => setEditPackage({ ...editPackage, maxFund: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Rebate Fee"
+              type="number"
+              fullWidth
+              value={editPackage.rebate}
+              onChange={(e) => setEditPackage({ ...editPackage, rebate: e.target.value })}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleEditAlertClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleEdit} color="primary">
               Save
             </Button>
           </DialogActions>
