@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Server from "../constants/server";
 import axios from 'axios';
@@ -24,6 +24,8 @@ const Users = () => {
         id: user.userID,
         name: user.name,
         email: user.email,
+        fundingBalance: user.fundingBalance,
+        spotBalance: user.spotBalance,
         role: 'User',
         status: 'Active'
       };
@@ -31,8 +33,8 @@ const Users = () => {
     }
     setRows(data);
   }
-  
- 
+
+
 
   const filteredRows = statusFilter === 'All' ? rows : rows.filter(row => row.status === statusFilter);
 
@@ -56,6 +58,8 @@ const Users = () => {
                 <TableCell>#ID</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Email</TableCell>
+                <TableCell>Funding Balance</TableCell>
+                <TableCell>Spot Balance</TableCell>
                 <TableCell>Role</TableCell>
                 <TableCell>Status</TableCell>
               </TableRow>
@@ -66,6 +70,8 @@ const Users = () => {
                   <TableCell>{row.id}</TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell>{row.email}</TableCell>
+                  <TableCell>{row.fundingBalance}</TableCell>
+                  <TableCell>{row.spotBalance}</TableCell>
                   <TableCell>{row.role}</TableCell>
                   <TableCell>
                     <Select
