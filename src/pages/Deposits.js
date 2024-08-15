@@ -23,18 +23,29 @@ const Deposits = () => {
   }, []);
 
   const fetchData = async () => {
-
-    const allDepositsRes = await axios.get(`${API_URL}/get_all_deposits`);
-
-    const data = [];
-    for (let index = 0; index < allDepositsRes.data.length; index++) {
-
-      const rowData = createData(allDepositsRes.data[index].DepositID, allDepositsRes.data[index].UserID, allDepositsRes.data[index].UserName
-        , allDepositsRes.data[index].Amount, allDepositsRes.data[index].dateTime, allDepositsRes.data[index].Status)
-      data.push(rowData);
+    try {
+      const allDepositsRes = await axios.get(`${API_URL}/get_all_deposits`);
+      const sortedDeposits = allDepositsRes.data.sort((a, b) => {
+        return new Date(b.dateTime) - new Date(a.dateTime);
+      });
+  
+      const data = sortedDeposits.map(deposit => {
+        return createData(
+          deposit.DepositID,
+          deposit.UserID,
+          deposit.UserName,
+          deposit.Amount,
+          deposit.dateTime,
+          deposit.Status
+        );
+      });
+  
+      setRows(data);
+    } catch (error) {
+      console.error("Error fetching deposits:", error);
     }
-    setRows(data);
-  }
+  };
+  
   const changeStatues = async (DepositID, e) => {
     const formData = new FormData();
     formData.append('DepositID', DepositID);

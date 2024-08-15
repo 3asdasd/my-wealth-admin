@@ -24,15 +24,22 @@ const Withdraw = () => {
 
   const fetchData = async () => {
     const allWithdrawRes = await axios.get(`${API_URL}/get_all_withdrawals`);
-    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    console.log(allWithdrawRes.data);
-    const data = [];
-    for (let index = 0; index < allWithdrawRes.data.length; index++) {
+    const sortedWithdrawels = allWithdrawRes.data.sort((a, b) => {
+      return new Date(b.dateTime) - new Date(a.dateTime);
+    });
 
-      const rowData = createData(allWithdrawRes.data[index].withdrawalID, allWithdrawRes.data[index].userID, allWithdrawRes.data[index].username
-        , allWithdrawRes.data[index].withdrawalWalletAddress, allWithdrawRes.data[index].amount, allWithdrawRes.data[index].dateTime, allWithdrawRes.data[index].status)
-      data.push(rowData);
-    }
+    const data = sortedWithdrawels.map(withdrawel => {
+      return createData(
+        withdrawel.withdrawalID,
+        withdrawel.userID,
+        withdrawel.username,
+        withdrawel.withdrawalWalletAddress,
+        withdrawel.amount,
+        withdrawel.dateTime,
+        withdrawel.status
+      );
+    });
+
     setRows(data);
 
   }
@@ -46,8 +53,6 @@ const Withdraw = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
-      console.log(allDepositsRes.data);
       if (allDepositsRes.data.code === "WITHDRAWAL_STATUS_UPDATED") {
         fetchData();
       }
