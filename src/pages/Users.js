@@ -6,6 +6,7 @@ import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, T
 import { RowingOutlined } from '@mui/icons-material';
 
 const Users = () => {
+  const token=localStorage.getItem('token');
   const [statusFilter, setStatusFilter] = useState('All');
   const [rows, setRows] = useState([]);
 
@@ -15,7 +16,11 @@ const Users = () => {
 
   const fetchData = async () => {
     const API_URL = Server.API_URL;
-    const allUsersRes = await axios.get(`${API_URL}/get_all_users`);
+    const allUsersRes = await axios.get(`${API_URL}/get_all_users`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
     const data = [];
     for (let index = 0; index < allUsersRes.data.users.length; index++) {

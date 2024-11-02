@@ -9,6 +9,7 @@ const createData = (id, UserID, UserName, withdrawalWalletAddress, Amount, dnt, 
   return { id, UserID, UserName, withdrawalWalletAddress, Amount, dnt, status };
 };
 const Withdraw = () => {
+  const token=localStorage.getItem('token');
   const [rows, setRows] = useState([]);
   const [statusFilter, setStatusFilter] = useState('All');
   // const rows = [
@@ -23,7 +24,11 @@ const Withdraw = () => {
 
 
   const fetchData = async () => {
-    const allWithdrawRes = await axios.get(`${API_URL}/get_all_withdrawals`);
+    const allWithdrawRes = await axios.get(`${API_URL}/get_all_withdrawals`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     const sortedWithdrawels = allWithdrawRes.data.sort((a, b) => {
       return new Date(b.dateTime) - new Date(a.dateTime);
     });
@@ -51,6 +56,7 @@ const Withdraw = () => {
       const allDepositsRes = await axios.put(`${API_URL}/update_withdrawal_status`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
         },
       });
       if (allDepositsRes.data.code === "WITHDRAWAL_STATUS_UPDATED") {

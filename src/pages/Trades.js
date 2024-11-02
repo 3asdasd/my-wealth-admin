@@ -14,6 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 
 export default function Trades() {
+  const token=localStorage.getItem('token');
   const API_URL = Server.API_URL;
   const [nowTrade, setNowTrade] = useState([]);
   const [rows, setRows] = useState([]);
@@ -33,9 +34,21 @@ export default function Trades() {
   }, []);
 
   const fetchData = async () => {
-    const allPackagesRes = await axios.get(`${API_URL}/get_packages`);
-    const tradeUsers = await axios.get(`${API_URL}/rt_users_trade_balance`);
-    const allTrades = await axios.get(`${API_URL}/getAll_trade`);
+    const allPackagesRes = await axios.get(`${API_URL}/get_packages`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const tradeUsers = await axios.get(`${API_URL}/rt_users_trade_balance`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const allTrades = await axios.get(`${API_URL}/getAll_trade`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     const data = [];
     for (let index = 0; index < allTrades.data.length; index++) {
       const rowData = { id: allTrades.data[index].tradeID, tradeDateTime: allTrades.data[index].datetime, amount: allTrades.data[index].amount, status: (allTrades.data[index].trade_on_off) ? 'Active' : 'Complete' };
@@ -52,10 +65,12 @@ export default function Trades() {
   }
 
   const handleOnOff = (event) => {
-    if (event.target.checked === false) {
-      handleOpen();
-    } else {
-      addTrade();
+    if(tradeBalance!==0){
+      if (event.target.checked === false) {
+        handleOpen();
+      } else {
+        addTrade();
+      }
     }
   };
 
@@ -65,6 +80,7 @@ export default function Trades() {
     await axios.post(`${API_URL}/create_trade`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+         Authorization: `Bearer ${token}`
       },
     })
       .then((r) => {
@@ -95,11 +111,7 @@ export default function Trades() {
     const newAmounts = [...amounts];
     newAmounts[index] = event.target.value;
     const newShareAmounts = [...shareAmounts];
-    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    console.log(newShareAmounts);
     newShareAmounts[index] = thisJson;
-    console.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-    console.log(newShareAmounts);
     setAmounts(newAmounts);
     setShareAmounts(newShareAmounts);
   };
@@ -121,7 +133,6 @@ export default function Trades() {
           setIsValid(true);
           testIsValid = true;
         } else {
-          console.log('kkkkkkkkkkkkkkkkkkk:', amounts[index]);
           setIsValid(false);
           testIsValid = false;
 
@@ -149,10 +160,11 @@ export default function Trades() {
     await axios.post(`${API_URL}/add_profit`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
       },
-    })
+    }
+  )
       .then((r) => {
-        console.log("1111111111111111111111111111111111111");
         console.log(r.data);
         if (r.data.code === 200) {
           console.log(r.data);

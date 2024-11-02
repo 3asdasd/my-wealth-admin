@@ -30,6 +30,7 @@ const initialRows = [
 ];
 const API_URL = Server.API_URL;
 const Packages = () => {
+  const token=localStorage.getItem('token');
   const [rows, setRows] = useState(initialRows);
   const [deletePackageId, setDeletePackageId] = useState('');
   const [open, setOpen] = useState(false);
@@ -56,7 +57,11 @@ const Packages = () => {
 
   const fetchData = async () => {
 
-    const allPackagesRes = await axios.get(`${API_URL}/get_packages`);
+    const allPackagesRes = await axios.get(`${API_URL}/get_packages`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
     const data = [];
     for (let index = 0; index < allPackagesRes.data.length; index++) {
@@ -81,8 +86,10 @@ const Packages = () => {
       const deleteRes = await axios.delete(`${API_URL}/package_delete/${id}`, {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
-      });
+      }
+    );
 
       console.log("Package deleted successfully:", deleteRes.data);
 
@@ -131,8 +138,10 @@ const Packages = () => {
     await axios.post(`${API_URL}/create_package`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+         Authorization: `Bearer ${token}`
       },
-    });
+    }
+  );
     fetchData();
     setNewPackage({
       id: '',
@@ -155,8 +164,10 @@ const Packages = () => {
     await axios.put(`${API_URL}/update_package`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
       },
-    });
+    }
+  );
     fetchData();
     setEditPackage({
       id: '',

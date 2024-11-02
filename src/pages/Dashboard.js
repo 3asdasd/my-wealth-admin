@@ -7,6 +7,7 @@ import Server from "../constants/server";
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
+  const token=localStorage.getItem('token');
 
   useEffect(() => {
     fetchData();
@@ -14,13 +15,41 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     const API_URL = Server.API_URL;
-    const allFunding = await axios.get(`${API_URL}/all_funding_balance`);
-    const allSpot = await axios.get(`${API_URL}/users_spot_balance`);
-    const allTotal = await axios.get(`${API_URL}/users_total_balance`);
-    const rtFunding = await axios.get(`${API_URL}/rt_funding_balance`);
-    const rtSpot = await axios.get(`${API_URL}/rt_users_spot_balance`);
-    const rtTotal = await axios.get(`${API_URL}/all_rt_users_balance`);
-    const allUsers = await axios.get(`${API_URL}/get_all_users`);
+    const allFunding = await axios.get(`${API_URL}/all_funding_balance`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const allSpot = await axios.get(`${API_URL}/users_spot_balance`, {
+      headers: {
+        Authorization: `Bearer ${token}`  
+      }
+    });
+    const allTotal = await axios.get(`${API_URL}/users_total_balance`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const rtFunding = await axios.get(`${API_URL}/rt_funding_balance`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const rtSpot = await axios.get(`${API_URL}/rt_users_spot_balance`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const rtTotal = await axios.get(`${API_URL}/all_rt_users_balance`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const allUsers = await axios.get(`${API_URL}/get_all_users`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
     const resdata = [
       { title: 'Funding Bal.', value: allFunding.data["Total Funding Balance"], subtitle: 'Total balance - $' + allTotal.data["total_balance"] },

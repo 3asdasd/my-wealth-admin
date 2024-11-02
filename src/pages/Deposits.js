@@ -11,6 +11,7 @@ const createData = (id, UserID, UserName, Amount, dnt, status) => {
 const Deposits = () => {
   const [rows, setRows] = useState([]);
   const [statusFilter, setStatusFilter] = useState('All');
+  const token=localStorage.getItem('token');
 
   // const rows = [
   //   { id: '123', userId: '049858', email: 'email@emails.com', address: '2345678987654334yhgfsrer5678722', dnt: '2334/44/44:23:44', status: 'Pending' },
@@ -24,7 +25,11 @@ const Deposits = () => {
 
   const fetchData = async () => {
     try {
-      const allDepositsRes = await axios.get(`${API_URL}/get_all_deposits`);
+      const allDepositsRes = await axios.get(`${API_URL}/get_all_deposits`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const sortedDeposits = allDepositsRes.data.sort((a, b) => {
         return new Date(b.dateTime) - new Date(a.dateTime);
       });
@@ -54,6 +59,7 @@ const Deposits = () => {
       const allDepositsRes = await axios.put(`${API_URL}/update_deposit_status`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
         },
       });
       if (allDepositsRes.data.code === "DEPOSIT_STATUS_UPDATED") {
